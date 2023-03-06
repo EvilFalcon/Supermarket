@@ -4,8 +4,7 @@ using System.Linq;
 
 namespace Supermarket
 {
-    class
-        Program
+    internal class Program
     {
         static void Main(string[] args)
         {
@@ -20,12 +19,24 @@ namespace Supermarket
         T Create();
     }
 
-    class RandomContener
+    static class UserUtils
     {
-        protected static readonly Random Random = new Random();
+          private static Random _random = new Random();
+
+          public static int GetRandomNumber(int maxValue,int minValue=0)
+          {
+              int number =_random.Next(minValue, maxValue);
+              return number;
+          }
+          
+          public static int GetRandomNumber(int value)
+          {
+              int number =_random.Next(value);
+              return number;
+          }
     }
 
-    class Buyer : RandomContener
+    class Buyer 
     {
         private string _name;
         private int _purchaseAmount;
@@ -69,16 +80,9 @@ namespace Supermarket
 
         public void DeleteOneProduct()
         {
-            int randomIndex = Random.Next(ProductsCount);
-            _products.RemoveAt(randomIndex);
-        }
+            int randomIndex = UserUtils.GetRandomNumber(ProductsCount);
 
-        public void TakeProduct(List<Product> products)
-        {
-            foreach(Product product in products)
-            {
-                _products.Add(product);
-            }
+            _products.RemoveAt(randomIndex);
         }
 
         public void ShowInfo()
@@ -104,15 +108,14 @@ namespace Supermarket
 
         public string Name { get; private set; }
         public int Price { get; private set; }
-
-
+        
         public void ShowInfo()
         {
             Console.WriteLine($"продукт : {Name}| цена : {Price}");
         }
     }
 
-    class Supermarket : RandomContener
+    class Supermarket
     {
         SupermarketCreator _supermarketCreator = new SupermarketCreator();
         private Queue<Buyer> _buyersQueue = new Queue<Buyer>();
@@ -135,7 +138,6 @@ namespace Supermarket
                 _buyer.ShowInfo();
                 Console.ReadKey();
                 Console.Clear();
-
             }
         }
 
@@ -144,6 +146,7 @@ namespace Supermarket
             Console.WriteLine($"|Баланс магазина {_money}р. |");
         }
         private void SellProducts()
+        
         {
 
             bool isTransactionCompleted = false;
@@ -154,7 +157,6 @@ namespace Supermarket
 
                 if(_buyer.TryGetBuy(price))
                 {
-                    _buyer.TakeProduct(_buyerProducts);
                     isTransactionCompleted = true;
                     _money += price;
                 }
@@ -175,11 +177,12 @@ namespace Supermarket
             {
                 bill += _buyer.GetProductPrice(i);
             }
+            
             return bill;
         }
     }
 
-    class BuyerCreator : RandomContener
+    class BuyerCreator
     {
         private const int minCountProducts = 1;
         private const int maxCountProducts = 10;
@@ -193,9 +196,9 @@ namespace Supermarket
 
         public Buyer Create()
         {
-            int randomMoney = Random.Next(minBalanse, maxBalanse);
-            int randomNameIndex = Random.Next(_personName.Length);
-            int randomCount = Random.Next(minCountProducts, maxCountProducts);
+            int randomMoney = UserUtils.GetRandomNumber( maxBalanse,minBalanse);
+            int randomNameIndex = UserUtils.GetRandomNumber(_personName.Length);
+            int randomCount = UserUtils.GetRandomNumber( maxCountProducts,minCountProducts);
             List<Product> products = new List<Product>();
             ProductCreator creator = new ProductCreator();
 
@@ -208,7 +211,7 @@ namespace Supermarket
         }
     }
 
-    class ProductCreator : RandomContener, ICreater<Product>
+    class ProductCreator : ICreater<Product>
     {
         private List<Product> _products = new List<Product>()
         {
@@ -219,20 +222,18 @@ namespace Supermarket
             new Product("Варенье",200),
             new Product("Мясо",500),
             new Product("Сок",120),
-
         };
 
         public Product Create()
         {
-            int indexProduct = Random.Next(_products.Count);
+            int indexProduct = UserUtils.GetRandomNumber(_products.Count);
             Product product = _products[indexProduct];
 
             return product;
         }
     }
-
-
-    class SupermarketCreator : RandomContener, ICreater<Queue<Buyer>>
+    
+    class SupermarketCreator : ICreater<Queue<Buyer>>
     {
         private BuyerCreator _creator = new BuyerCreator();
         private const int _maxQueueCount = 40;
@@ -241,7 +242,7 @@ namespace Supermarket
 
         public Queue<Buyer> Create()
         {
-            int QueueCount = Random.Next(_minQueueCount, _maxQueueCount);
+            int QueueCount = UserUtils.GetRandomNumber( _maxQueueCount,_minQueueCount);
 
             for(int i = 0; i < QueueCount; i++)
             {
