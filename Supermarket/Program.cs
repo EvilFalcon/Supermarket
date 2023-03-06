@@ -21,22 +21,22 @@ namespace Supermarket
 
     static class UserUtils
     {
-          private static Random _random = new Random();
+        private static Random _random = new Random();
 
-          public static int GetRandomNumber(int maxValue,int minValue=0)
-          {
-              int number =_random.Next(minValue, maxValue);
-              return number;
-          }
-          
-          public static int GetRandomNumber(int value)
-          {
-              int number =_random.Next(value);
-              return number;
-          }
+        public static int GetRandomNumber(int maxValue, int minValue = 0)
+        {
+            int number = _random.Next(minValue, maxValue);
+            return number;
+        }
+
+        public static int GetRandomNumber(int value)
+        {
+            int number = _random.Next(value);
+            return number;
+        }
     }
 
-    class Buyer 
+    class Buyer
     {
         private string _name;
         private int _purchaseAmount;
@@ -54,7 +54,7 @@ namespace Supermarket
 
         public bool TryGetBuy(int price)
         {
-            if(_money >= price)
+            if (_money >= price)
             {
                 _purchaseAmount = price;
                 _money -= price;
@@ -68,7 +68,7 @@ namespace Supermarket
 
         public int GetProductPrice(int index)
         {
-            if(_products.Count > 0)
+            if (_products.Count > 0)
             {
                 return _products[index].Price;
             }
@@ -89,7 +89,7 @@ namespace Supermarket
         {
             string namesProducts = "";
 
-            foreach(Product product in _products)
+            foreach (Product product in _products)
             {
                 namesProducts += $"{product.Name}, ";
             }
@@ -108,7 +108,7 @@ namespace Supermarket
 
         public string Name { get; private set; }
         public int Price { get; private set; }
-        
+
         public void ShowInfo()
         {
             Console.WriteLine($"продукт : {Name}| цена : {Price}");
@@ -130,7 +130,7 @@ namespace Supermarket
 
         public void Work()
         {
-            while(_buyersQueue.Count > 0)
+            while (_buyersQueue.Count > 0)
             {
                 _buyer = _buyersQueue.Dequeue();
                 SellProducts();
@@ -145,17 +145,17 @@ namespace Supermarket
         {
             Console.WriteLine($"|Баланс магазина {_money}р. |");
         }
-        private void SellProducts()
-        
-        {
 
+        private void SellProducts()
+
+        {
             bool isTransactionCompleted = false;
 
-            while(isTransactionCompleted == false)
+            while (isTransactionCompleted == false)
             {
                 int price = CalculateTheCost();
 
-                if(_buyer.TryGetBuy(price))
+                if (_buyer.TryGetBuy(price))
                 {
                     isTransactionCompleted = true;
                     _money += price;
@@ -173,84 +173,84 @@ namespace Supermarket
 
             int productsCount = _buyer.ProductsCount;
 
-            for(int i = 0; i < productsCount; i++)
+            for (int i = 0; i < productsCount; i++)
             {
                 bill += _buyer.GetProductPrice(i);
             }
-            
+
             return bill;
         }
     }
 
     class BuyerCreator
     {
-        private const int minCountProducts = 1;
-        private const int maxCountProducts = 10;
-        private const int minBalanse = 1;
-        private const int maxBalanse = 10000;
-
-        private string[] _personName = new[]
-        {
-            "Саша", "Миша", "Дима", "Леша", "Паша", "Лена", "Вика", "Наташа", "Артем", "Вася"
-        };
-
         public Buyer Create()
         {
-            int randomMoney = UserUtils.GetRandomNumber( maxBalanse,minBalanse);
-            int randomNameIndex = UserUtils.GetRandomNumber(_personName.Length);
-            int randomCount = UserUtils.GetRandomNumber( maxCountProducts,minCountProducts);
+            int minCountProducts = 1;
+            int maxCountProducts = 10;
+            int minBalanse = 1;
+            int maxBalanse = 10000;
+            string[] personName = new[]
+            {
+                "Саша", "Миша", "Дима", "Леша", "Паша", "Лена", "Вика", "Наташа", "Артем", "Вася"
+            };
+
+            int randomMoney = UserUtils.GetRandomNumber(maxBalanse, minBalanse);
+            int randomNameIndex = UserUtils.GetRandomNumber(personName.Length);
+            int randomCount = UserUtils.GetRandomNumber(maxCountProducts, minCountProducts);
             List<Product> products = new List<Product>();
             ProductCreator creator = new ProductCreator();
 
-            for(int j = randomCount; j > 0; j--)
+            for (int j = randomCount; j > 0; j--)
             {
                 products.Add(creator.Create());
             }
 
-            return new Buyer(_personName[randomNameIndex], randomMoney, products);
+            return new Buyer(personName[randomNameIndex], randomMoney, products);
         }
     }
 
     class ProductCreator : ICreater<Product>
     {
-        private List<Product> _products = new List<Product>()
-        {
-            new Product("Яблоко",100),
-            new Product("Перец",60),
-            new Product("Молоко",70),
-            new Product("Масло",150),
-            new Product("Варенье",200),
-            new Product("Мясо",500),
-            new Product("Сок",120),
-        };
-
         public Product Create()
         {
-            int indexProduct = UserUtils.GetRandomNumber(_products.Count);
-            Product product = _products[indexProduct];
+            List<Product> products = new List<Product>()
+            {
+                new Product("Яблоко", 100),
+                new Product("Перец", 60),
+                new Product("Молоко", 70),
+                new Product("Масло", 150),
+                new Product("Варенье", 200),
+                new Product("Мясо", 500),
+                new Product("Сок", 120),
+            };
+
+            int indexProduct = UserUtils.GetRandomNumber(products.Count);
+            Product product = products[indexProduct];
 
             return product;
         }
     }
-    
+
     class SupermarketCreator : ICreater<Queue<Buyer>>
     {
-        private BuyerCreator _creator = new BuyerCreator();
-        private const int _maxQueueCount = 40;
-        private const int _minQueueCount = 10;
-        private Queue<Buyer> _queueBauyers = new Queue<Buyer>();
-
         public Queue<Buyer> Create()
         {
-            int QueueCount = UserUtils.GetRandomNumber( _maxQueueCount,_minQueueCount);
+            int maxQueueCount = 40;
+            int minQueueCount = 10;
 
-            for(int i = 0; i < QueueCount; i++)
+            BuyerCreator creator = new BuyerCreator();
+            Queue<Buyer> queueBauyers = new Queue<Buyer>();
+
+            int queueCount = UserUtils.GetRandomNumber(maxQueueCount, minQueueCount);
+
+            for (int i = 0; i < queueCount; i++)
             {
-                Buyer buyer = _creator.Create();
-                _queueBauyers.Enqueue(buyer);
+                Buyer buyer = creator.Create();
+                queueBauyers.Enqueue(buyer);
             }
 
-            return _queueBauyers;
+            return queueBauyers;
         }
     }
 }
